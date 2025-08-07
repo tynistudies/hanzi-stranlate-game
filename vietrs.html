@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dịch Tiếng Việt Sang Tiếng Trung</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: #fff0f5;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+
+    input,
+    button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+
+    #score {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>🌸 Dịch tiếng Việt sang tiếng Trung 🌸</h2>
+    <p id="question"></p>
+    <input type="text" id="answerInput" placeholder="Nhập tiếng Trung hoặc Pinyin...">
+    <br>
+    <button onclick="checkAnswer()">✅ Kiểm tra</button>
+    <button onclick="nextQuestion()">➡️ Câu tiếp theo</button>
+    <div id="result"></div>
+    <div id="score"></div>
+
+    <!-- ✅ Thêm dòng giới thiệu ở đây -->
+    <p style="margin-top: 30px; font-size: 14px;">
+      Được phát triển bởi 
+      <a href="https://www.facebook.com/tynistudies/" target="_blank" style="color: #ff69b4; text-decoration: none;">
+        Tynistudies
+      </a>
+    </p>
+  </div>
+
+  <script>
+    const questions = [
+      { vi: "Tôi yêu bạn", zh: "我爱你", pinyin: "wǒ ài nǐ" },
+      { vi: "Chúc mừng sinh nhật", zh: "生日快乐", pinyin: "shēng rì kuài lè" },
+      { vi: "Cảm ơn", zh: "谢谢", pinyin: "xiè xie" },
+      { vi: "Xin lỗi", zh: "对不起", pinyin: "duì bu qǐ" },
+      { vi: "Tạm biệt", zh: "再见", pinyin: "zài jiàn" },
+      { vi: "Không sao", zh: "没关系", pinyin: "méi guān xi" },
+      { vi: "Tôi đói rồi", zh: "我饿了", pinyin: "wǒ è le" },
+      { vi: "Tôi mệt", zh: "我累了", pinyin: "wǒ lèi le" },
+      { vi: "Đi thôi", zh: "走吧", pinyin: "zǒu ba" },
+      { vi: "Tôi là học sinh", zh: "我是学生", pinyin: "wǒ shì xué shēng" },
+      { vi: "Tôi đang học tiếng Trung", zh: "我在学中文", pinyin: "wǒ zài xué zhōngwén" },
+      { vi: "Bạn học trường nào?", zh: "你在哪个学校上学？", pinyin: "nǐ zài nǎ ge xuéxiào shàngxué?" },
+      { vi: "Tôi thích học ngoại ngữ", zh: "我喜欢学外语", pinyin: "wǒ xǐhuan xué wàiyǔ" },
+      { vi: "Thầy giáo rất nghiêm khắc", zh: "老师很严格", pinyin: "lǎoshī hěn yángé" },
+      { vi: "Cô giáo rất tốt", zh: "老师很好", pinyin: "lǎoshī hěn hǎo" },
+      { vi: "Tôi chưa làm xong bài tập", zh: "我还没做完作业", pinyin: "wǒ hái méi zuò wán zuòyè" },
+      { vi: "Ngày mai có bài kiểm tra", zh: "明天有考试", pinyin: "míngtiān yǒu kǎoshì" },
+      { vi: "Tôi muốn học giỏi hơn", zh: "我想学得更好", pinyin: "wǒ xiǎng xué de gèng hǎo" },
+      { vi: "Tôi cần một quyển từ điển", zh: "我需要一本词典", pinyin: "wǒ xūyào yì běn cídiǎn" },
+      { vi: "Chúng ta cùng học nhé", zh: "我们一起学习吧", pinyin: "wǒmen yìqǐ xuéxí ba" },
+      { vi: "Bạn hiểu không?", zh: "你明白吗？", pinyin: "nǐ míngbai ma?" },
+      { vi: "Tôi không hiểu câu này", zh: "我不懂这句话", pinyin: "wǒ bù dǒng zhè jù huà" },
+      { vi: "Tôi cần ôn lại bài", zh: "我需要复习一下", "pinyin": "wǒ xūyào fùxí yíxià" },
+      { vi: "Đừng làm ồn, tôi đang học", zh: "别吵，我在学习", pinyin: "bié chǎo, wǒ zài xuéxí" },
+      { vi: "Tôi quên mang sách rồi", zh: "我忘了带书", pinyin: "wǒ wàng le dài shū" },
+      { vi: "Giờ học bắt đầu lúc mấy giờ?", zh: "上课几点开始？", pinyin: "shàngkè jǐ diǎn kāishǐ?" },
+      { vi: "Tôi muốn hỏi một câu", zh: "我想问一个问题", pinyin: "wǒ xiǎng wèn yí ge wèntí" },
+      { vi: "Hôm nay có bài tập về nhà không?", zh: "今天有家庭作业吗？", pinyin: "jīntiān yǒu jiātíng zuòyè ma?" },
+      { vi: "Tôi cần giúp đỡ", zh: "我需要帮助", pinyin: "wǒ xūyào bāngzhù" },
+      { vi: "Bạn có thể giảng lại không?", zh: "你可以再讲一遍吗？", pinyin: "nǐ kěyǐ zài jiǎng yí biàn ma?" },
+      { vi: "Tôi chào sếp buổi sáng", zh: "早上好，老板", pinyin: "zǎoshang hǎo, lǎobǎn" },
+      { vi: "Tôi đã hoàn thành công việc", zh: "我已经完成工作了", pinyin: "wǒ yǐjīng wánchéng gōngzuò le" },
+      { vi: "Cần tôi hỗ trợ gì không ạ?", zh: "需要我帮忙吗？", pinyin: "xūyào wǒ bāngmáng ma?" },
+      { vi: "Tôi sẽ cố gắng hết sức", zh: "我会尽力的", pinyin: "wǒ huì jìnlì de" },
+      { vi: "Đây là báo cáo hôm nay", zh: "这是今天的报告", pinyin: "zhè shì jīntiān de bàogào" },
+      { vi: "Xin lỗi vì sự chậm trễ", zh: "对不起，我迟到了", pinyin: "duìbùqǐ, wǒ chídào le" },
+      { vi: "Tôi sẽ sửa lại ngay", zh: "我马上修改", pinyin: "wǒ mǎshàng xiūgǎi" },
+      { vi: "Sếp có góp ý gì không ạ?", zh: "老板有建议吗？", pinyin: "lǎobǎn yǒu jiànyì ma?" },
+      { vi: "Tôi đang xử lý việc này", zh: "我正在处理这件事", pinyin: "wǒ zhèngzài chǔlǐ zhè jiàn shì" },
+      { vi: "Tôi cần thêm thời gian", zh: "我需要更多时间", pinyin: "wǒ xūyào gèng duō shíjiān" },
+      { vi: "Tôi sẽ gửi mail cho sếp", zh: "我会发邮件给老板", pinyin: "wǒ huì fā yóujiàn gěi lǎobǎn" },
+      { vi: "Tôi có một đề xuất", zh: "我有一个建议", pinyin: "wǒ yǒu yí gè jiànyì" },
+      { vi: "Sếp có thể họp một lát không?", zh: "老板可以开个会吗？", pinyin: "lǎobǎn kěyǐ kāi gè huì ma?" },
+      { vi: "Tôi cần xác nhận từ sếp", zh: "我需要老板确认", pinyin: "wǒ xūyào lǎobǎn quèrèn" },
+      { vi: "Tôi đã gửi file cho sếp rồi", zh: "我已经把文件发给老板了", pinyin: "wǒ yǐjīng bǎ wénjiàn fā gěi lǎobǎn le" },
+      { vi: "Cảm ơn sếp đã chỉ dẫn", zh: "谢谢老板的指导", pinyin: "xièxie lǎobǎn de zhǐdǎo" },
+      { vi: "Tôi có thể nghỉ phép không?", zh: "我可以请假吗？", pinyin: "wǒ kěyǐ qǐngjià ma?" },
+      { vi: "Tôi có thể nói chuyện riêng với sếp không?", zh: "我可以单独和老板谈谈吗？", pinyin: "wǒ kěyǐ dāndú hé lǎobǎn tán tán ma?" },
+      { vi: "Sếp có thể cho tôi ý kiến không?", zh: "老板可以给我一些意见吗？", pinyin: "lǎobǎn kěyǐ gěi wǒ yìxiē yìjiàn ma?" },
+      { vi: "Công việc này khá gấp", zh: "这个工作比较紧急", pinyin: "zhè ge gōngzuò bǐjiào jǐnjí" },
+      { vi: "Chào buổi sáng!", zh: "早上好！", pinyin: "zǎoshang hǎo!" },
+      { vi: "Hôm nay bạn có bận không?", zh: "你今天忙吗？", pinyin: "nǐ jīntiān máng ma?" },
+      { vi: "Cùng đi ăn trưa nhé", zh: "一起去吃午饭吧", pinyin: "yìqǐ qù chī wǔfàn ba" },
+      { vi: "Bạn giúp tôi việc này được không?", zh: "你能帮我这个忙吗？", pinyin: "nǐ néng bāng wǒ zhè ge máng ma?" },
+      { vi: "Tôi có thể giúp gì cho bạn?", zh: "我可以帮你什么？", pinyin: "wǒ kěyǐ bāng nǐ shénme?" },
+      { vi: "Chúng ta cùng hoàn thành nhé", zh: "我们一起完成吧", pinyin: "wǒmen yìqǐ wánchéng ba" },
+      { vi: "Bạn nghĩ sao về ý tưởng này?", zh: "你觉得这个想法怎么样？", pinyin: "nǐ juéde zhè ge xiǎngfǎ zěnmeyàng?" },
+      { vi: "Làm tốt lắm!", zh: "做得很好！", pinyin: "zuò de hěn hǎo!" },
+      { vi: "Cố lên!", zh: "加油！", pinyin: "jiāyóu!" },
+      { vi: "Bạn bận không? Tôi có việc muốn nhờ", zh: "你忙吗？我有事想请你帮忙", pinyin: "nǐ máng ma? wǒ yǒu shì xiǎng qǐng nǐ bāngmáng" },
+      { vi: "Chúc bạn một ngày làm việc vui vẻ!", zh: "祝你工作愉快！", pinyin: "zhù nǐ gōngzuò yúkuài!" },
+      { vi: "Cần tôi giúp gì không?", zh: "需要我帮什么忙吗？", pinyin: "xūyào wǒ bāng shénme máng ma?" },
+      { vi: "Chúng ta thảo luận chút nhé", zh: "我们来讨论一下吧", pinyin: "wǒmen lái tǎolùn yíxià ba" },
+      { vi: "Bạn nghỉ trưa chưa?", zh: "你午休了吗？", pinyin: "nǐ wǔxiū le ma?" },
+      { vi: "Bạn gửi file cho tôi nhé", zh: "你发文件给我吧", pinyin: "nǐ fā wénjiàn gěi wǒ ba" },
+      { vi: "Cảm ơn bạn rất nhiều", zh: "非常感谢你", pinyin: "fēicháng gǎnxiè nǐ" },
+      { vi: "Tôi rất vui khi làm việc cùng bạn", zh: "我很高兴和你一起工作", pinyin: "wǒ hěn gāoxìng hé nǐ yìqǐ gōngzuò" },
+      { vi: "Xin lỗi đã làm phiền", zh: "不好意思，打扰了", pinyin: "bù hǎoyìsi, dǎrǎo le" },
+      { vi: "Mai bạn đến công ty mấy giờ?", zh: "你明天几点到公司？", pinyin: "nǐ míngtiān jǐ diǎn dào gōngsī?" },
+      { vi: "Chúc bạn cuối tuần vui vẻ!", zh: "周末愉快！", pinyin: "zhōumò yúkuài!" },
+      { vi: "Tôi muốn mua cái này", zh: "我想买这个", pinyin: "wǒ xiǎng mǎi zhè ge" },
+      { vi: "Cái này bao nhiêu tiền?", zh: "这个多少钱？", pinyin: "zhè ge duōshǎo qián?" },
+      { vi: "Có thể rẻ hơn không?", zh: "可以便宜一点吗？", pinyin: "kěyǐ piányi yìdiǎn ma?" },
+      { vi: "Tôi chỉ xem thôi", zh: "我只是看看", pinyin: "wǒ zhǐ shì kànkan" },
+      { vi: "Có màu khác không?", zh: "有别的颜色吗？", pinyin: "yǒu bié de yánsè ma?" },
+      { vi: "Tôi muốn thử", zh: "我想试一试", pinyin: "wǒ xiǎng shì yí shì" },
+      { vi: "Có giảm giá không?", zh: "有折扣吗？", pinyin: "yǒu zhékòu ma?" },
+      { vi: "Tôi mua hai cái", zh: "我买两个", pinyin: "wǒ mǎi liǎng ge" },
+      { vi: "Có thể thanh toán bằng thẻ không?", zh: "可以刷卡吗？", pinyin: "kěyǐ shuākǎ ma?" },
+      { vi: "Tôi muốn lấy hoá đơn", zh: "我要发票", pinyin: "wǒ yào fāpiào" },
+      { vi: "Đắt quá rồi", zh: "太贵了", pinyin: "tài guì le" },
+      { vi: "Rẻ quá!", zh: "太便宜了！", pinyin: "tài piányi le!" },
+      { vi: "Tôi không cần túi", zh: "我不要袋子", pinyin: "wǒ bú yào dàizi" },
+      { vi: "Có hàng mới không?", zh: "有新货吗？", pinyin: "yǒu xīn huò ma?" },
+      { vi: "Tôi muốn đổi cái khác", zh: "我想换一个", pinyin: "wǒ xiǎng huàn yí ge" },
+      { vi: "Mở cửa lúc mấy giờ?", zh: "几点开门？", pinyin: "jǐ diǎn kāimén?" },
+      { vi: "Đóng cửa lúc mấy giờ?", zh: "几点关门？", pinyin: "jǐ diǎn guānmén?" },
+      { vi: "Cái áo này vừa với tôi", zh: "这件衣服很合适", pinyin: "zhè jiàn yīfu hěn héshì" },
+      { vi: "Tôi muốn màu đen", zh: "我想要黑色的", pinyin: "wǒ xiǎng yào hēisè de" },
+      { vi: "Có size lớn hơn không?", zh: "有大一点的吗？", pinyin: "yǒu dà yìdiǎn de ma?" },
+      { vi: "Bạn có thể gói quà giúp tôi không?", zh: "你可以帮我包装吗？", pinyin: "nǐ kěyǐ bāng wǒ bāozhuāng ma?" },
+      { vi: "Tôi muốn trả lại hàng", zh: "我想退货", pinyin: "wǒ xiǎng tuì huò" },
+      { vi: "Tôi muốn đổi hàng", zh: "我想换货", pinyin: "wǒ xiǎng huàn huò" },
+      { vi: "Giao hàng trong bao lâu?", zh: "多久送货？", pinyin: "duōjiǔ sòng huò?" },
+      { vi: "Phí vận chuyển bao nhiêu?", zh: "运费多少钱？", pinyin: "yùnfèi duōshǎo qián?" },
+      { vi: "Tôi đặt hàng online", zh: "我在网上下单", pinyin: "wǒ zài wǎngshàng xiàdān" },
+      { vi: "Sản phẩm có bảo hành không?", zh: "产品有保修吗？", pinyin: "chǎnpǐn yǒu bǎoxiū ma?" },
+      { vi: "Tôi nhận được rồi", zh: "我收到了", pinyin: "wǒ shōudào le" },
+      { vi: "Tôi chưa nhận được hàng", zh: "我还没收到货", pinyin: "wǒ hái méi shōudào huò" },
+      { vi: "Tôi sẽ thanh toán khi nhận hàng", zh: "我货到付款", pinyin: "wǒ huòdào fùkuǎn" },
+      { vi: "Tôi đã thanh toán rồi", zh: "我已经付款了", pinyin: "wǒ yǐjīng fùkuǎn le" },
+      { vi: "Bạn có thể giảm giá không?", zh: "你能打个折吗？", pinyin: "nǐ néng dǎ ge zhé ma?" },
+      { vi: "Tôi muốn trả giá", zh: "我想讲价", pinyin: "wǒ xiǎng jiǎngjià" },
+      { vi: "Có bảo hành bao lâu?", zh: "保修多久？", pinyin: "bǎoxiū duōjiǔ?" },
+      { vi: "Chất lượng rất tốt", zh: "质量很好", pinyin: "zhìliàng hěn hǎo" },
+      { vi: "Tôi thích cái này hơn", zh: "我更喜欢这个", pinyin: "wǒ gèng xǐhuan zhè ge" },
+      { vi: "Có thể giao đến nhà không?", zh: "可以送到家吗？", pinyin: "kěyǐ sòng dào jiā ma?" },
+      { vi: "Tôi muốn đặt trước", zh: "我想预订", pinyin: "wǒ xiǎng yùdìng" },
+      { vi: "Số lượng có giới hạn không?", zh: "数量有限吗？", pinyin: "shùliàng yǒuxiàn ma?" },
+      { vi: "Có còn hàng không?", zh: "还有货吗？", pinyin: "hái yǒu huò ma?" },
+      { vi: "Bạn có cửa hàng offline không?", zh: "你有实体店吗？", pinyin: "nǐ yǒu shítǐdiàn ma?" },
+      { vi: "Tôi muốn mua thêm", zh: "我想多买一点", pinyin: "wǒ xiǎng duō mǎi yìdiǎn" },
+      { vi: "Mua một tặng một phải không?", zh: "买一送一吗？", pinyin: "mǎi yī sòng yī ma?" },
+      { vi: "Chương trình khuyến mãi đến bao giờ?", zh: "促销到什么时候？", pinyin: "cùxiāo dào shénme shíhou?" },
+      { vi: "Tôi muốn hỏi giá", zh: "我想问价格", pinyin: "wǒ xiǎng wèn jiàgé" },
+      { vi: "Sản phẩm này rất phổ biến", zh: "这个产品很受欢迎", pinyin: "zhè ge chǎnpǐn hěn shòu huānyíng" },
+      { vi: "Có thể đổi trả trong bao lâu?", zh: "多久可以退换？", pinyin: "duōjiǔ kěyǐ tuì huàn?" },
+      { vi: "Tôi cần một cái mới", zh: "我需要一个新的", pinyin: "wǒ xūyào yí ge xīn de" },
+      { vi: "Tôi không hài lòng với sản phẩm", zh: "我对产品不满意", pinyin: "wǒ duì chǎnpǐn bù mǎnyì" },
+      { vi: "Cảm ơn, lần sau tôi sẽ quay lại", zh: "谢谢，下次我再来", pinyin: "xièxie, xià cì wǒ zài lái" },
+      { vi: "Tôi đang ở trước cổng trường", zh: "我在学校门口", pinyin: "wǒ zài xuéxiào ménkǒu" },
+      { vi: "Thư viện ở bên phải tòa nhà", zh: "图书馆在大楼右边", pinyin: "túshūguǎn zài dàlóu yòubiān" },
+      { vi: "Siêu thị ở gần nhà tôi", zh: "超市在我家附近", pinyin: "chāoshì zài wǒ jiā fùjìn" },
+      { vi: "Rẽ trái ở ngã tư", zh: "在十字路口左转", pinyin: "zài shízìlùkǒu zuǒ zhuǎn" },
+      { vi: "Bệnh viện ở phía sau trường học", zh: "医院在学校后面", pinyin: "yīyuàn zài xuéxiào hòumiàn" },
+      { vi: "Tôi đứng trước cửa", zh: "我站在门前", pinyin: "wǒ zhàn zài mén qián" },
+      { vi: "Quán cà phê ở đối diện ngân hàng", zh: "咖啡馆在银行对面", pinyin: "kāfēiguǎn zài yínháng duìmiàn" },
+      { vi: "Phòng tôi ở tầng 5", zh: "我的房间在五楼", pinyin: "wǒ de fángjiān zài wǔ lóu" },
+      { vi: "Đi thẳng về phía trước", zh: "一直往前走", pinyin: "yìzhí wǎng qián zǒu" },
+      { vi: "Nhà vệ sinh ở đâu?", zh: "洗手间在哪儿？", pinyin: "xǐshǒujiān zài nǎr?" },
+      { vi: "Xe buýt dừng ở trạm kế tiếp", zh: "公交车在下一个站停", pinyin: "gōngjiāochē zài xià yí gè zhàn tíng" },
+      { vi: "Trường học ở phía đông thành phố", zh: "学校在城市的东边", pinyin: "xuéxiào zài chéngshì de dōngbiān" },
+      { vi: "Thang máy ở cuối hành lang", zh: "电梯在走廊的尽头", pinyin: "diàntī zài zǒuláng de jìntóu" },
+      { vi: "Trạm xe lửa ở phía bắc", zh: "火车站在北边", pinyin: "huǒchēzhàn zài běibiān" },
+      { vi: "Tôi đang đến công viên", zh: "我正在去公园", pinyin: "wǒ zhèngzài qù gōngyuán" },
+      { vi: "Rạp chiếu phim ở góc đường", zh: "电影院在街角", pinyin: "diànyǐngyuàn zài jiējiǎo" },
+      { vi: "Chợ sáng ở phía tây", zh: "早市在西边", pinyin: "zǎoshì zài xībiān" },
+      { vi: "Cửa hàng quần áo ở tầng 2", zh: "服装店在二楼", pinyin: "fúzhuāngdiàn zài èr lóu" },
+      { vi: "Bưu điện ở cạnh ngân hàng", zh: "邮局在银行旁边", pinyin: "yóujú zài yínháng pángbiān" },
+      { vi: "Cửa sổ ở bên trái phòng", zh: "窗户在房间左边", pinyin: "chuānghu zài fángjiān zuǒbiān" },
+      { vi: "Cầu thang ở gần cửa chính", zh: "楼梯在大门附近", pinyin: "lóutī zài dàmén fùjìn" },
+      { vi: "Sân bóng ở bên ngoài trường", zh: "球场在学校外面", pinyin: "qiúchǎng zài xuéxiào wàimiàn" },
+      { vi: "Anh ấy ở trong phòng họp", zh: "他在会议室里", pinyin: "tā zài huìyìshì lǐ" },
+      { vi: "Giá sách ở sau bàn", zh: "书架在桌子后面", pinyin: "shūjià zài zhuōzi hòumiàn" },
+      { vi: "Máy in ở góc phòng", zh: "打印机在房间角落", pinyin: "dǎyìnjī zài fángjiān jiǎoluò" },
+      { vi: "Đi lên bằng thang cuốn", zh: "坐扶梯上去", pinyin: "zuò fútī shàngqù" },
+      { vi: "Nhà tôi ở giữa ngân hàng và siêu thị", zh: "我家在银行和超市中间", pinyin: "wǒ jiā zài yínháng hé chāoshì zhōngjiān" },
+      { vi: "Tôi đang đi về phía nhà ga", zh: "我正在往车站走", pinyin: "wǒ zhèngzài wǎng chēzhàn zǒu" },
+      { vi: "Chỗ này cách đó xa không?", zh: "这个地方离那里远吗？", pinyin: "zhè ge dìfāng lí nàli yuǎn ma?" },
+      { vi: "Rẽ phải ở góc đèn đỏ", zh: "在红绿灯处右转", pinyin: "zài hónglǜdēng chù yòu zhuǎn" },
+      { vi: "Tôi rất vui", zh: "我很高兴", pinyin: "wǒ hěn gāoxìng" },
+      { vi: "Tôi buồn", zh: "我很难过", pinyin: "wǒ hěn nánguò" },
+      { vi: "Tôi lo lắng", zh: "我很担心", pinyin: "wǒ hěn dānxīn" },
+      { vi: "Tôi tức giận", zh: "我很生气", pinyin: "wǒ hěn shēngqì" },
+      { vi: "Tôi mệt", zh: "我累了", pinyin: "wǒ lèi le" },
+      { vi: "Tôi thất vọng", zh: "我很失望", pinyin: "wǒ hěn shīwàng" },
+      { vi: "Tôi ngạc nhiên", zh: "我很惊讶", pinyin: "wǒ hěn jīngyà" },
+      { vi: "Tôi căng thẳng", zh: "我很紧张", pinyin: "wǒ hěn jǐnzhāng" },
+      { vi: "Hôm nay trời nắng", zh: "今天是晴天", pinyin: "jīntiān shì qíngtiān" },
+      { vi: "Ngày mai có mưa", zh: "明天下雨", pinyin: "míngtiān xià yǔ" },
+      { vi: "Hôm nay trời lạnh", zh: "今天很冷", pinyin: "jīntiān hěn lěng" },
+      { vi: "Thời tiết rất đẹp", zh: "天气很好", pinyin: "tiānqì hěn hǎo" },
+      { vi: "Trời đang gió", zh: "正在刮风", pinyin: "zhèngzài guā fēng" },
+      { vi: "Trời nhiều mây", zh: "多云", pinyin: "duō yún" },
+      { vi: "Trời rất nóng", zh: "天气很热", pinyin: "tiānqì hěn rè" },
+      { vi: "Có tuyết rơi", zh: "下雪了", pinyin: "xià xuě le" },
+      { vi: "Tôi thích đọc sách", zh: "我喜欢看书", pinyin: "wǒ xǐhuān kànshū" },
+      { vi: "Tôi thích nghe nhạc", zh: "我喜欢听音乐", pinyin: "wǒ xǐhuān tīng yīnyuè" },
+      { vi: "Tôi thích du lịch", zh: "我喜欢旅游", pinyin: "wǒ xǐhuān lǚyóu" },
+      { vi: "Tôi thích vẽ tranh", zh: "我喜欢画画", pinyin: "wǒ xǐhuān huàhuà" },
+      { vi: "Tôi thích nấu ăn", zh: "我喜欢做饭", pinyin: "wǒ xǐhuān zuòfàn" },
+      { vi: "Tôi không thích xem tivi", zh: "我不喜欢看电视", pinyin: "wǒ bù xǐhuān kàn diànshì" },
+      { vi: "Tôi thích chơi thể thao", zh: "我喜欢运动", pinyin: "wǒ xǐhuān yùndòng" },
+      { vi: "Tôi thích học tiếng Trung", zh: "我喜欢学中文", pinyin: "wǒ xǐhuān xué zhōngwén" },
+      { vi: "Thật sao?", zh: "真的吗？", pinyin: "zhēn de ma?" },
+      { vi: "Được thôi!", zh: "好啊！", pinyin: "hǎo a!" },
+      { vi: "Không vấn đề gì", zh: "没问题", pinyin: "méi wèntí" },
+      { vi: "Không sao đâu", zh: "没关系", pinyin: "méi guānxi" },
+      { vi: "Cậu đang làm gì vậy?", zh: "你在干嘛？", pinyin: "nǐ zài gàn ma?" },
+      { vi: "Tớ cũng nghĩ vậy", zh: "我也这么觉得", pinyin: "wǒ yě zhème juéde" },
+      { vi: "Tớ đói rồi", zh: "我饿了", pinyin: "wǒ è le" },
+      { vi: "Đi thôi!", zh: "走吧！", pinyin: "zǒu ba!" },
+      { vi: "Chờ chút nhé", zh: "等一下", pinyin: "děng yíxià" },
+      { vi: "Thật tuyệt!", zh: "太棒了！", pinyin: "tài bàng le!" },
+      { vi: "Thật ngại quá", zh: "不好意思", pinyin: "bù hǎoyìsi" },
+      { vi: "Thật kinh khủng!", zh: "太可怕了！", pinyin: "tài kěpà le!" },
+      { vi: "Tớ mệt chết mất", zh: "累死我了", pinyin: "lèi sǐ wǒ le" },
+      { vi: "Tớ đi trước nhé", zh: "我先走了", pinyin: "wǒ xiān zǒu le" },
+      { vi: "Đừng lo!", zh: "别担心", pinyin: "bié dānxīn" },
+      { vi: "Thật là phiền quá", zh: "真麻烦", pinyin: "zhēn máfan" },
+      { vi: "Thật không thể tin được", zh: "难以置信", pinyin: "nányǐ zhìxìn" },
+      { vi: "Có gì mới không?", zh: "有什么新鲜事吗？", pinyin: "yǒu shénme xīnxiān shì ma?" },
+      { vi: "Tùy cậu thôi", zh: "随便你", pinyin: "suíbiàn nǐ" },
+      { vi: "Cố lên!", zh: "加油！", pinyin: "jiāyóu!" },
+      { vi: "Tớ không chắc nữa", zh: "我不太确定", pinyin: "wǒ bú tài quèdìng" },
+      { vi: "Tôi đang xử lý việc này", zh: "我正在处理这个事情", pinyin: "wǒ zhèngzài chǔlǐ zhège shìqing" },
+      { vi: "Tôi sẽ gửi lại sớm", zh: "我会尽快发给你", pinyin: "wǒ huì jǐnkuài fā gěi nǐ" },
+      { vi: "Việc này hơi gấp", zh: "这个事情有点急", pinyin: "zhège shìqing yǒudiǎn jí" },
+      { vi: "Chúng ta có thể thảo luận không?", zh: "我们可以讨论一下吗？", pinyin: "wǒmen kěyǐ tǎolùn yíxià ma?" },
+      { vi: "Tôi cần xác nhận lại", zh: "我需要再确认一下", pinyin: "wǒ xūyào zài quèrèn yíxià" },
+      { vi: "Bạn làm rất tốt", zh: "你做得很好", pinyin: "nǐ zuò de hěn hǎo" },
+      { vi: "Đây là ý kiến cá nhân tôi", zh: "这是我个人的意见", pinyin: "zhè shì wǒ gèrén de yìjiàn" },
+      { vi: "Tôi đồng ý với bạn", zh: "我同意你的看法", pinyin: "wǒ tóngyì nǐ de kànfǎ" },
+      { vi: "Tôi sẽ cân nhắc thêm", zh: "我会再考虑一下", pinyin: "wǒ huì zài kǎolǜ yíxià" },
+      { vi: "Bạn có thể giúp tôi không?", zh: "你能帮我一下吗？", pinyin: "nǐ néng bāng wǒ yíxià ma?" },
+      { vi: "Cảm ơn đã hỗ trợ", zh: "谢谢你的支持", pinyin: "xièxie nǐ de zhīchí" },
+      { vi: "Hãy báo cho tôi sớm", zh: "请尽早告诉我", pinyin: "qǐng jǐnzǎo gàosu wǒ" },
+      { vi: "Chúng ta bắt đầu nhé", zh: "我们开始吧", pinyin: "wǒmen kāishǐ ba" },
+      { vi: "Tôi vẫn đang đợi phản hồi", zh: "我还在等回复", pinyin: "wǒ hái zài děng huífù" },
+      { vi: "Tôi có thể hỏi thêm một chút không?", zh: "我可以再问一下吗？", pinyin: "wǒ kěyǐ zài wèn yíxià ma?" },
+      { vi: "Cuộc họp khi nào bắt đầu?", zh: "会议什么时候开始？", pinyin: "huìyì shénme shíhou kāishǐ?" },
+      { vi: "Chúng ta cần phối hợp chặt chẽ hơn", zh: "我们需要更好地配合", pinyin: "wǒmen xūyào gèng hǎo de pèihé" },
+      { vi: "Bạn có thể gửi lại không?", zh: "你能重新发一遍吗？", pinyin: "nǐ néng chóngxīn fā yí biàn ma?" },
+      { vi: "Không thành vấn đề", zh: "没问题", pinyin: "méi wèntí" },
+      { vi: "Tôi sẽ hoàn thành đúng thời hạn", zh: "我会按时完成", pinyin: "wǒ huì ànshí wánchéng" },
+      { vi: "Thế cũng được thôi", zh: "那也行吧", pinyin: "nà yě xíng ba" },
+      { vi: "Cậu nói cũng có lý", zh: "你说得也有道理", pinyin: "nǐ shuō de yě yǒu dàolǐ" },
+      { vi: "Tùy tình huống thôi", zh: "看情况吧", pinyin: "kàn qíngkuàng ba" },
+      { vi: "Chúng ta cứ thử xem sao", zh: "我们试试看吧", pinyin: "wǒmen shì shìkàn ba" },
+      { vi: "Không thể tin nổi luôn!", zh: "简直不敢相信！", pinyin: "jiǎnzhí bù gǎn xiāngxìn!" },
+      { vi: "Tớ quên mất rồi!", zh: "我忘了！", pinyin: "wǒ wàng le!" },
+      { vi: "Nói thật đấy à?", zh: "说真的？", pinyin: "shuō zhēn de?" },
+      { vi: "Đừng làm quá lên", zh: "别太夸张了", pinyin: "bié tài kuāzhāng le" },
+      { vi: "Không cần khách sáo", zh: "不用客气", pinyin: "bú yòng kèqi" },
+      { vi: "Thật không dễ dàng gì", zh: "真不容易", pinyin: "zhēn bù róngyì" },
+      { vi: "Cũng tạm ổn", zh: "还算可以", pinyin: "hái suàn kěyǐ" },
+      { vi: "Chắc chắn rồi", zh: "当然了", pinyin: "dāngrán le" },
+      { vi: "Tớ hiểu cảm giác đó", zh: "我能理解", pinyin: "wǒ néng lǐjiě" },
+      { vi: "Nói thẳng đi", zh: "你直说吧", pinyin: "nǐ zhí shuō ba" },
+      { vi: "Làm gì có chuyện đó!", zh: "哪有这种事！", pinyin: "nǎ yǒu zhè zhǒng shì!" },
+      { vi: "Cũng có thể như vậy", zh: "也许是这样", pinyin: "yěxǔ shì zhèyàng" },
+      { vi: "Tớ không quan tâm lắm", zh: "我无所谓", pinyin: "wǒ wúsuǒwèi" },
+      { vi: "Không cần gấp đâu", zh: "不着急", pinyin: "bù zhāojí" },
+      { vi: "Làm tốt lắm!", zh: "做得很好！", pinyin: "zuò de hěn hǎo!" }
+    ];
+
+    let current = 0;
+    let correct = Number(localStorage.getItem('correct')) || 0;
+    let total = Number(localStorage.getItem('total')) || 0;
+
+    function displayQuestion() {
+      document.getElementById("question").innerText = `👉 Câu: ${questions[current].vi}`;
+      document.getElementById("answerInput").value = "";
+      document.getElementById("result").innerText = "";
+      updateScore();
+    }
+
+    function normalize(str) {
+      return str.trim().toLowerCase().replace(/\s+/g, '');
+    }
+
+    function checkAnswer() {
+      const userAnswer = normalize(document.getElementById("answerInput").value);
+      const correctZh = normalize(questions[current].zh);
+      const correctPin = normalize(questions[current].pinyin);
+
+      total++;
+
+      if (userAnswer === correctZh || userAnswer === correctPin) {
+        correct++;
+        document.getElementById("result").innerText = "🎉 Chính xác!";
+      } else {
+        document.getElementById("result").innerText =
+          `😢 Sai rồi. Đáp án đúng là: ${questions[current].zh} (${questions[current].pinyin})`;
+      }
+
+      localStorage.setItem('correct', correct);
+      localStorage.setItem('total', total);
+      updateScore();
+    }
+
+    function nextQuestion() {
+      current = Math.floor(Math.random() * questions.length);
+      displayQuestion();
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = `🎯 Số đúng: ${correct} / Tổng: ${total}`;
+    }
+
+    window.onload = displayQuestion;
+  </script>
+</body>
+
+</html>
